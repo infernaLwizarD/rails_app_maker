@@ -1,0 +1,32 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: "Dockerfile.development"
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - bundler_gems:/usr/local/bundle
+    ports:
+      - ${WEB_PORT:-3001}:3000
+    depends_on:
+      - db
+      - selenium_chrome
+
+  selenium_chrome:
+    image: __SELENIUM_IMAGE__
+    shm_size: 2gb
+    logging:
+      driver: none
+    ports:
+      - 5900:5900
+
+  adminer:
+    image: __ADMINER_IMAGE__
+    ports:
+      - ${ADMINER_PORT:-8080}:8080
+
+volumes:
+  bundler_gems:

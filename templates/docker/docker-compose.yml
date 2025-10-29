@@ -1,0 +1,12 @@
+services:
+  db:
+    image: __POSTGRES_IMAGE__
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+
+volumes:
+  postgres_data: null
