@@ -66,17 +66,45 @@ process_template() {
 # Проверка аргументов
 if [ $# -eq 0 ]; then
     log_error "Укажите имя приложения"
-    echo "Использование: $0 <app_name> [ruby_version] [install_dir]"
+    echo "Использование: $0 <app_name> [ruby_version] [install_dir] [--boilerplate]"
     echo "Пример: $0 my_rails_app 3.3.6"
     echo "Пример с путём: $0 my_rails_app 3.3.6 /path/to/install"
+    echo "Пример с boilerplate: $0 my_rails_app 3.3.6 --boilerplate"
+    echo ""
+    echo "Опции:"
+    echo "  --boilerplate  Установить rails8_boilerplate (конфиги будут перезаписаны генератором)"
     echo ""
     echo "Текущая директория установки: $APPS_INSTALL_DIR"
     exit 1
 fi
 
+# Парсинг аргументов
+USE_BOILERPLATE=false
 APP_NAME=$1
-RUBY_VERSION=${2:-$DEFAULT_RUBY_VERSION}
-CUSTOM_INSTALL_DIR=${3:-""}
+RUBY_VERSION=""
+CUSTOM_INSTALL_DIR=""
+
+# Обработка остальных аргументов
+shift
+while [ $# -gt 0 ]; do
+    case $1 in
+        --boilerplate)
+            USE_BOILERPLATE=true
+            ;;
+        *)
+            if [ -z "$RUBY_VERSION" ]; then
+                RUBY_VERSION=$1
+            elif [ -z "$CUSTOM_INSTALL_DIR" ]; then
+                CUSTOM_INSTALL_DIR=$1
+            fi
+            ;;
+    esac
+    shift
+done
+
+# Установка значений по умолчанию
+RUBY_VERSION=${RUBY_VERSION:-$DEFAULT_RUBY_VERSION}
+CUSTOM_INSTALL_DIR=${CUSTOM_INSTALL_DIR:-""}
 
 # Определяем директорию установки
 if [ -n "$CUSTOM_INSTALL_DIR" ]; then
@@ -88,6 +116,9 @@ fi
 log_info "Создание Rails приложения: $APP_NAME"
 log_info "Версия Ruby: $RUBY_VERSION"
 log_info "Директория установки: $APP_DIR"
+if [ "$USE_BOILERPLATE" = true ]; then
+    log_info "Режим: с установкой rails8_boilerplate"
+fi
 
 # Проверка существования директории
 if [ -d "$APP_DIR" ]; then
@@ -162,6 +193,19 @@ fi
 
 cp "$TEMPLATES_DIR/config/database.yml" "config/database.yml"
 
+if [ "$USE_BOILERPLATE" = true ]; then
+    log_info "Docker конфиги созданы и будут перезаписаны при установке boilerplate..."
+fi
+
+# Добавление rails8_boilerplate в Gemfile если выбрана опция
+if [ "$USE_BOILERPLATE" = true ]; then
+    log_info "Добавление rails8_boilerplate в Gemfile..."
+    # Добавляем гем в конец Gemfile
+    echo "" >> Gemfile
+    echo "# Rails 8 Boilerplate" >> Gemfile
+    echo "gem 'rails8_boilerplate', git: 'https://github.com/infernaLwizarD/rails8_boilerplate.git'" >> Gemfile
+fi
+
 # Создание пустого Gemfile.lock для Docker build
 log_info "Создание Gemfile.lock..."
 touch Gemfile.lock
@@ -170,13 +214,25 @@ touch Gemfile.lock
 log_info "Сборка Docker образа..."
 docker compose build
 
-# Установка гемов
+# Установка зависимостей
 log_info "Установка зависимостей..."
 docker compose run --rm web bundle install
 
-# Создание БД
-log_info "Создание баз данных..."
-docker compose run --rm web rails db:create
+# Установка и настройка boilerplate если выбрана опция
+if [ "$USE_BOILERPLATE" = true ]; then
+    log_info "Установка rails8_boilerplate..."
+    docker compose run --rm web rails generate rails8_boilerplate:install
+    
+    log_info "Выполнение миграций..."
+    docker compose run --rm web rails db:migrate
+    
+    log_info "Заполнение базы данных..."
+    docker compose run --rm web rails db:seed
+else
+    # Создание БД
+    log_info "Создание баз данных..."
+    docker compose run --rm web rails db:create
+fi
 
 # Финальное сообщение
 echo ""
@@ -194,4 +250,11 @@ echo "  docker compose up"
 echo ""
 echo "Приложение будет доступно по адресу: http://localhost:$DEFAULT_WEB_PORT"
 echo "Adminer (для управления БД): http://localhost:$DEFAULT_ADMINER_PORT"
+
+if [ "$USE_BOILERPLATE" = true ]; then
+    echo ""
+    echo "✨ Rails 8 Boilerplate установлен и настроен!"
+    echo "Примечание: Конфигурационные файлы могли быть изменены генератором boilerplate."
+fi
+
 echo ""
