@@ -11,7 +11,7 @@ if [ -f "$SCRIPT_DIR/config.sh" ]; then
 else
     log_warn "Файл config.sh не найден, используются значения по умолчанию"
     APPS_INSTALL_DIR="$(dirname "$SCRIPT_DIR")"
-    DEFAULT_RUBY_VERSION="3.3.6"
+    DEFAULT_RUBY_VERSION="4.0.1"
     RAILS_VERSION_CONSTRAINT="~> 8.0"
     DEFAULT_WEB_PORT=3001
     DEFAULT_POSTGRES_PORT=5432
@@ -67,9 +67,9 @@ process_template() {
 if [ $# -eq 0 ]; then
     log_error "Укажите имя приложения"
     echo "Использование: $0 <app_name> [ruby_version] [install_dir] [--boilerplate] [--rails-flags='...']"
-    echo "Пример: $0 my_rails_app 3.3.6"
-    echo "Пример с путём: $0 my_rails_app 3.3.6 /path/to/install"
-    echo "Пример с boilerplate: $0 my_rails_app 3.3.6 --boilerplate"
+    echo "Пример: $0 my_rails_app 4.0.1"
+    echo "Пример с путём: $0 my_rails_app 4.0.1 /path/to/install"
+    echo "Пример с boilerplate: $0 my_rails_app 4.0.1 --boilerplate"
     echo "Пример с rails флагами: $0 my_rails_app --rails-flags='--skip-test --css=tailwind'"
     echo ""
     echo "Опции:"

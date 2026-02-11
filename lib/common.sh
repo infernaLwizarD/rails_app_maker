@@ -119,7 +119,7 @@ prompt_ruby_version() {
             REPLY_VALUE="$input"
             return
         else
-            print_err "Формат версии: X.Y.Z (например, 3.3.6)"
+            print_err "Формат версии: X.Y.Z (например, 4.0.1)"
         fi
     done
 }

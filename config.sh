@@ -6,7 +6,7 @@
 APPS_INSTALL_DIR="${APPS_INSTALL_DIR:-$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")}"
 
 # Версия Ruby по умолчанию
-DEFAULT_RUBY_VERSION="3.3.6"
+DEFAULT_RUBY_VERSION="4.0.1"
 
 # Версия Rails
 RAILS_VERSION_CONSTRAINT="~> 8.0"

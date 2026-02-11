@@ -88,14 +88,14 @@ rails_app_maker/
 
 **Примеры:**
 ```bash
-# С настройками по умолчанию (Ruby 3.3.6, установка в родительскую директорию)
+# С настройками по умолчанию (Ruby 4.0.1, установка в родительскую директорию)
 ./create-rails-app.sh my_awesome_app
 
 # С указанием версии Ruby
 ./create-rails-app.sh my_awesome_app 3.3.5
 
 # С указанием директории установки
-./create-rails-app.sh my_awesome_app 3.3.6 /home/user/projects
+./create-rails-app.sh my_awesome_app 4.0.1 /home/user/projects
 
 # Или через переменную окружения
 APPS_INSTALL_DIR=/custom/path ./create-rails-app.sh my_app
@@ -135,7 +135,7 @@ Adminer (управление БД): `http://localhost:8081`
 
 Можно изменить это поведение:
 1. Отредактировав `APPS_INSTALL_DIR` в `config.sh`
-2. Передав путь третьим аргументом: `./create-rails-app.sh myapp 3.3.6 /custom/path`
+2. Передав путь третьим аргументом: `./create-rails-app.sh myapp 4.0.1 /custom/path`
 3. Через переменную окружения: `APPS_INSTALL_DIR=/custom/path ./create-rails-app.sh myapp`
 
 ## Работа из любой директории

@@ -9,7 +9,7 @@ if [ -f "$SCRIPT_DIR/config.sh" ]; then
     source "$SCRIPT_DIR/config.sh"
 else
     APPS_INSTALL_DIR="$(dirname "$SCRIPT_DIR")"
-    DEFAULT_RUBY_VERSION="3.3.6"
+    DEFAULT_RUBY_VERSION="4.0.1"
     RAILS_VERSION_CONSTRAINT="~> 8.0"
     DEFAULT_WEB_PORT=3001
     DEFAULT_POSTGRES_PORT=5432

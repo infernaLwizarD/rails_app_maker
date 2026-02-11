@@ -9,7 +9,7 @@
 APPS_INSTALL_DIR="${APPS_INSTALL_DIR:-$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")}"
 
 # Версия Ruby по умолчанию
-DEFAULT_RUBY_VERSION="3.3.6"
+DEFAULT_RUBY_VERSION="4.0.1"
 
 # Версия Rails
 # "~> 8.0" - последняя версия 8.x, но не 9.x
