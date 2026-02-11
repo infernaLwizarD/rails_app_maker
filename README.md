@@ -7,17 +7,24 @@
 ```bash
 git clone <repository-url> rails_app_maker
 cd rails_app_maker
-chmod +x create-rails-app.sh
+chmod +x setup.sh create-rails-app.sh
 ```
 
 ## Структура проекта
 
 ```
 rails_app_maker/
-├── create-rails-app.sh       # Основной скрипт
+├── setup.sh                  # Интерактивный мастер установки
+├── create-rails-app.sh       # Основной скрипт создания приложения
 ├── config.sh                 # Конфигурация
 ├── config.example.sh         # Пример конфигурации
 ├── README.md
+├── lib/                      # Модули мастера установки
+│   ├── common.sh             # Общие функции вывода и ввода
+│   ├── rails_options.sh      # Интерактивный выбор опций rails new
+│   ├── mode_basic.sh         # Режим 1: базовая установка
+│   ├── mode_quick.sh         # Режимы 2–3: быстрая / быстрая + boilerplate
+│   └── mode_advanced.sh      # Режим 4: расширенная установка
 └── templates/                # Шаблоны файлов
     ├── docker/
     │   ├── Dockerfile.development
@@ -55,11 +62,28 @@ rails_app_maker/
 
 ## Использование
 
-### create-rails-app.sh
+### setup.sh — Интерактивный мастер (рекомендуется)
+
+Самый простой способ создать приложение — запустить интерактивный мастер:
+
+```bash
+./setup.sh
+```
+
+Мастер предлагает 4 режима установки:
+
+1. **Базовая установка (выбор опций rails new)** — интерактивный выбор стандартных опций генератора Rails: база данных, CSS-процессор, JavaScript-подход, пропуск компонентов (Action Mailer, Hotwire, тесты и т.д.), режимы API/Minimal.
+2. **Быстрая установка** — Rails + PostgreSQL + Docker с настройками по умолчанию. Нужно указать только имя приложения.
+3. **Быстрая + Boilerplate** — то же, плюс автоматическая установка rails8_boilerplate.
+4. **Расширенная установка** — полная настройка всех параметров: версия Ruby, директория, порты, опции rails new, boilerplate.
+
+Все параметры имеют значения по умолчанию — достаточно нажимать Enter для быстрой настройки. Ввод валидируется (имя приложения, версия Ruby, порты, да/нет на русском и английском).
+
+### create-rails-app.sh — Прямой запуск
 
 **Базовое использование:**
 ```bash
-./create-rails-app.sh <app_name> [ruby_version] [install_dir]
+./create-rails-app.sh <app_name> [ruby_version] [install_dir] [--boilerplate] [--rails-flags='...']
 ```
 
 **Примеры:**
@@ -75,6 +99,9 @@ rails_app_maker/
 
 # Или через переменную окружения
 APPS_INSTALL_DIR=/custom/path ./create-rails-app.sh my_app
+
+# С дополнительными флагами rails new
+./create-rails-app.sh my_awesome_app --rails-flags='--skip-test --css=tailwind --skip-kamal'
 ```
 
 **Что делает скрипт:**

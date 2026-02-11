@@ -66,13 +66,16 @@ process_template() {
 # Проверка аргументов
 if [ $# -eq 0 ]; then
     log_error "Укажите имя приложения"
-    echo "Использование: $0 <app_name> [ruby_version] [install_dir] [--boilerplate]"
+    echo "Использование: $0 <app_name> [ruby_version] [install_dir] [--boilerplate] [--rails-flags='...']"
     echo "Пример: $0 my_rails_app 3.3.6"
     echo "Пример с путём: $0 my_rails_app 3.3.6 /path/to/install"
     echo "Пример с boilerplate: $0 my_rails_app 3.3.6 --boilerplate"
+    echo "Пример с rails флагами: $0 my_rails_app --rails-flags='--skip-test --css=tailwind'"
     echo ""
     echo "Опции:"
-    echo "  --boilerplate  Установить rails8_boilerplate (конфиги будут перезаписаны генератором)"
+    echo "  --boilerplate          Установить rails8_boilerplate (конфиги будут перезаписаны генератором)"
+    echo "  --rails-flags='...'    Дополнительные флаги для rails new (см. rails new -h)"
+    echo "  --vanilla              Чистая установка: только rails new, без кастомных Docker/конфигов"
     echo ""
     echo "Текущая директория установки: $APPS_INSTALL_DIR"
     exit 1
@@ -80,9 +83,11 @@ fi
 
 # Парсинг аргументов
 USE_BOILERPLATE=false
+VANILLA_MODE=false
 APP_NAME=$1
 RUBY_VERSION=""
 CUSTOM_INSTALL_DIR=""
+EXTRA_RAILS_FLAGS=""
 
 # Обработка остальных аргументов
 shift
@@ -90,6 +95,16 @@ while [ $# -gt 0 ]; do
     case $1 in
         --boilerplate)
             USE_BOILERPLATE=true
+            ;;
+        --vanilla)
+            VANILLA_MODE=true
+            ;;
+        --rails-flags=*)
+            EXTRA_RAILS_FLAGS="${1#--rails-flags=}"
+            ;;
+        --rails-flags)
+            shift
+            EXTRA_RAILS_FLAGS="$1"
             ;;
         *)
             if [ -z "$RUBY_VERSION" ]; then
@@ -116,6 +131,12 @@ fi
 log_info "Создание Rails приложения: $APP_NAME"
 log_info "Версия Ruby: $RUBY_VERSION"
 log_info "Директория установки: $APP_DIR"
+if [ "$VANILLA_MODE" = true ]; then
+    log_info "Режим: чистая установка (vanilla)"
+fi
+if [ -n "$EXTRA_RAILS_FLAGS" ]; then
+    log_info "Доп. флаги rails new: $EXTRA_RAILS_FLAGS"
+fi
 if [ "$USE_BOILERPLATE" = true ]; then
     log_info "Режим: с установкой rails8_boilerplate"
 fi
@@ -133,7 +154,39 @@ cd "$APP_DIR"
 
 # Генерация Rails приложения через Docker
 log_info "Генерация Rails приложения (это может занять несколько минут)..."
-docker run --rm -v "${PWD}:/app" -w /app ruby:$RUBY_VERSION bash -c "gem install rails -v '${RAILS_VERSION_CONSTRAINT}' && rails new . --force --database=postgresql --skip-bundle"
+RAILS_NEW_CMD="rails new . --force --database=postgresql --skip-bundle"
+if [ -n "$EXTRA_RAILS_FLAGS" ]; then
+    RAILS_NEW_CMD="$RAILS_NEW_CMD $EXTRA_RAILS_FLAGS"
+fi
+docker run --rm -v "${PWD}:/app" -w /app ruby:$RUBY_VERSION bash -c "gem install rails -v '${RAILS_VERSION_CONSTRAINT}' && $RAILS_NEW_CMD"
+
+# ============================================================
+# Vanilla-режим: только rails new, без кастомизации
+# ============================================================
+
+if [ "$VANILLA_MODE" = true ]; then
+    echo ""
+    log_info "✨ Rails приложение '$APP_NAME' успешно создано!"
+    echo ""
+    echo "Детали:"
+    echo "  Директория: $APP_DIR"
+    echo "  Ruby версия: $RUBY_VERSION"
+    if [ -n "$EXTRA_RAILS_FLAGS" ]; then
+        echo "  Флаги rails new: $EXTRA_RAILS_FLAGS"
+    fi
+    echo ""
+    echo "Это чистое Rails-приложение без дополнительной кастомизации."
+    echo "Для начала работы:"
+    echo "  cd $APP_DIR"
+    echo "  bundle install"
+    echo "  bin/rails server"
+    echo ""
+    exit 0
+fi
+
+# ============================================================
+# Кастомная установка: Docker-окружение, шаблоны, сборка
+# ============================================================
 
 # Переименование стандартного Dockerfile
 log_info "Настройка Docker файлов..."

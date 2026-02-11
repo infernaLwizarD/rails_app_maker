@@ -1,5 +1,8 @@
 # Работа с шаблонами
 
+Шаблоны обрабатываются в `create-rails-app.sh` через функцию `process_template`,
+которая заменяет плейсхолдеры на значения из `config.sh` и сгенерированные данные.
+
 ## Структура шаблонов
 
 Все шаблоны находятся в директории `templates/` и организованы по категориям:
@@ -63,7 +66,7 @@ REDIS_IMAGE="redis:7-alpine"
 DEFAULT_REDIS_PORT=6379
 ```
 
-### 4. Обновите скрипт create-rails-app.sh
+### 4. Обновите `create-rails-app.sh`
 
 Добавьте обработку нового шаблона:
 
@@ -76,3 +79,11 @@ DEFAULT_REDIS_PORT=6379
 log_info "Создание docker-compose.redis.yml..."
 process_template "$TEMPLATES_DIR/docker/docker-compose.redis.yml" "docker-compose.redis.yml"
 ```
+
+## Архитектура скриптов
+
+- `setup.sh` — интерактивный мастер, собирает параметры и вызывает `create-rails-app.sh`
+- `create-rails-app.sh` — основной скрипт, который непосредственно создаёт приложение (можно вызывать напрямую)
+- `lib/` — модули мастера установки (общие функции, режимы, опции rails new)
+- `config.sh` — настройки по умолчанию и плейсхолдеры для шаблонов
+- `templates/` — файлы-шаблоны с плейсхолдерами
