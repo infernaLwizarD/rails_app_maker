@@ -7,7 +7,7 @@
 ```bash
 git clone <repository-url> rails_app_maker
 cd rails_app_maker
-chmod +x setup.sh create-rails-app.sh
+chmod +x setup.sh create-rails-app.sh cleanup.sh
 ```
 
 ## Структура проекта
@@ -16,6 +16,7 @@ chmod +x setup.sh create-rails-app.sh
 rails_app_maker/
 ├── setup.sh                  # Интерактивный мастер установки
 ├── create-rails-app.sh       # Основной скрипт создания приложения
+├── cleanup.sh                # Очистка Docker-ресурсов приложения
 ├── config.sh                 # Конфигурация
 ├── config.example.sh         # Пример конфигурации
 ├── README.md
@@ -122,6 +123,28 @@ docker compose up
 
 Приложение доступно по адресу: `http://localhost:3001`  
 Adminer (управление БД): `http://localhost:8081`
+
+### cleanup.sh — Очистка Docker-ресурсов
+
+После удаления директории приложения Docker-ресурсы (контейнеры, образы, volumes) остаются.
+Для их очистки используйте `cleanup.sh`:
+
+```bash
+# Интерактивный режим — автообнаружение проектов,
+# выбор из списка, выбор компонентов для удаления
+./cleanup.sh
+
+# Указать приложение напрямую
+./cleanup.sh my_awesome_app
+
+# Полная очистка всех ресурсов (с подтверждением)
+./cleanup.sh my_awesome_app --all
+
+# Полная очистка без подтверждения (для автоматизации)
+./cleanup.sh my_awesome_app --all --yes
+```
+
+Скрипт автоматически находит все Docker Compose проекты по labels (`com.docker.compose.project`) и предлагает выбрать из списка. Для каждого типа ресурсов (контейнеры, сети, образы, volumes) спрашивает отдельно. Volumes (данные БД) по умолчанию не удаляются. Удаление безопасно — затрагивает только ресурсы выбранного проекта.
 
 ## Требования
 
