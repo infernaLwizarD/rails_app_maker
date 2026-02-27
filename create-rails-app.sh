@@ -274,7 +274,7 @@ docker compose run --rm web bundle install
 # Установка и настройка boilerplate если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
     log_info "Установка rails8_boilerplate..."
-    docker compose run --rm web rails generate rails8_boilerplate:install
+    docker compose run --rm web rails generate rails8_boilerplate:install --force
     
     log_info "Выполнение миграций..."
     docker compose run --rm web rails db:migrate
