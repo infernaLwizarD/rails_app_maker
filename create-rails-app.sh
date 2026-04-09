@@ -273,9 +273,19 @@ docker compose run --rm web bundle install
 
 # Установка и настройка boilerplate если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
+    # Сохраняем .env — генератор boilerplate перезаписывает его с новым DB_PASSWORD,
+    # что ломает подключение к уже инициализированному PostgreSQL
+    cp .env .env.backup
+
     log_info "Установка rails8_boilerplate..."
     docker compose run --rm web rails generate rails8_boilerplate:install --force
-    
+
+    # Восстанавливаем .env с оригинальным DB_PASSWORD
+    mv .env.backup .env
+
+    log_info "Создание баз данных..."
+    docker compose run --rm web rails db:create
+
     log_info "Выполнение миграций..."
     docker compose run --rm web rails db:migrate
     
