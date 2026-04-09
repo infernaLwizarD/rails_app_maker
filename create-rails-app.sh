@@ -271,6 +271,11 @@ docker compose build
 log_info "Установка зависимостей..."
 docker compose run --rm web bundle install
 
+# rails new --skip-bundle не запускает пост-установочные генераторы гемов,
+# поэтому importmap, turbo и stimulus нужно инициализировать вручную
+log_info "Инициализация importmap, turbo, stimulus..."
+docker compose run --rm web rails importmap:install turbo:install stimulus:install
+
 # Установка и настройка boilerplate если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
     # Сохраняем .env — генератор boilerplate перезаписывает его с новым DB_PASSWORD,
