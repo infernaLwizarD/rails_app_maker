@@ -250,13 +250,26 @@ if [ "$USE_BOILERPLATE" = true ]; then
     log_info "Docker конфиги созданы и будут перезаписаны при установке boilerplate..."
 fi
 
-# Добавление rails8_boilerplate в Gemfile если выбрана опция
+# Добавление rails8_boilerplate как git submodule если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
+    log_info "Инициализация git репозитория..."
+    git init
+    git add -A
+    git commit -m "init: rails new ${APP_NAME}" --quiet
+
+    log_info "Добавление rails8_boilerplate как git submodule..."
+    git submodule add "$BOILERPLATE_GIT_URL" "$BOILERPLATE_SUBMODULE_PATH"
+
     log_info "Добавление rails8_boilerplate в Gemfile..."
-    # Добавляем гем в конец Gemfile
     echo "" >> Gemfile
     echo "# Rails 8 Boilerplate" >> Gemfile
-    echo "gem 'rails8_boilerplate', git: 'https://github.com/infernaLwizarD/rails8_boilerplate.git'" >> Gemfile
+    echo "# Development: engine из submodule" >> Gemfile
+    echo "# Production: engine из git по стабильному тегу" >> Gemfile
+    echo "if ENV['RAILS_ENV'] == 'production'" >> Gemfile
+    echo "  gem 'rails8_boilerplate', git: '${BOILERPLATE_GIT_URL}', tag: 'v0.1.0'" >> Gemfile
+    echo "else" >> Gemfile
+    echo "  gem 'rails8_boilerplate', path: '${BOILERPLATE_SUBMODULE_PATH}'" >> Gemfile
+    echo "end" >> Gemfile
 fi
 
 # Создание пустого Gemfile.lock для Docker build
