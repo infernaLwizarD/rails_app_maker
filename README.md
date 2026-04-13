@@ -20,6 +20,7 @@ rails_app_maker/
 ├── config.sh                 # Конфигурация
 ├── config.example.sh         # Пример конфигурации
 ├── README.md
+├── TEMPLATES.md              # Документация по шаблонам и плейсхолдерам
 ├── lib/                      # Модули мастера установки
 │   ├── common.sh             # Общие функции вывода и ввода
 │   ├── rails_options.sh      # Интерактивный выбор опций rails new
@@ -43,12 +44,14 @@ rails_app_maker/
 
 ## Конфигурация
 
-Настройки находятся в файле `config.sh`:
+Настройки находятся в файле `config.sh` (пример: `config.example.sh`):
 
 - **APPS_INSTALL_DIR** — директория для создания приложений (по умолчанию: родительская директория от скрипта)
 - **DEFAULT_RUBY_VERSION** — версия Ruby по умолчанию
 - **RAILS_VERSION_CONSTRAINT** — версия Rails
-- **Порты и образы Docker** — настройки для PostgreSQL, Selenium, Adminer
+- **Порты по умолчанию** — `DEFAULT_WEB_PORT`, `DEFAULT_POSTGRES_PORT`, `DEFAULT_ADMINER_PORT`
+- **Rails8 Boilerplate** — `BOILERPLATE_GIT_URL`, `BOILERPLATE_SUBMODULE_PATH`
+- **Образы Docker** — `POSTGRES_IMAGE`, `SELENIUM_IMAGE`, `ADMINER_IMAGE`
 
 ## Кастомизация шаблонов
 
@@ -84,7 +87,7 @@ rails_app_maker/
 
 **Базовое использование:**
 ```bash
-./create-rails-app.sh <app_name> [ruby_version] [install_dir] [--boilerplate] [--rails-flags='...']
+./create-rails-app.sh <app_name> [ruby_version] [install_dir] [--boilerplate] [--vanilla] [--rails-flags='...']
 ```
 
 **Примеры:**
@@ -103,6 +106,12 @@ APPS_INSTALL_DIR=/custom/path ./create-rails-app.sh my_app
 
 # С дополнительными флагами rails new
 ./create-rails-app.sh my_awesome_app --rails-flags='--skip-test --css=tailwind --skip-kamal'
+
+# С установкой rails8_boilerplate (git submodule + генератор)
+./create-rails-app.sh my_awesome_app --boilerplate
+
+# Чистая установка: только rails new, без Docker/конфигов
+./create-rails-app.sh my_awesome_app --vanilla
 ```
 
 **Что делает скрипт:**
@@ -113,7 +122,10 @@ APPS_INSTALL_DIR=/custom/path ./create-rails-app.sh my_app
 - Создаёт entrypoint скрипты для контейнеров
 - Переносит RAILS_MASTER_KEY в .env файл
 - Собирает Docker образ и устанавливает зависимости
+- Инициализирует importmap, turbo, stimulus
 - Создаёт базы данных
+- При `--boilerplate` — добавляет rails8_boilerplate как git submodule, запускает генератор, миграции и seeds
+- При `--vanilla` — только `rails new`, без Docker-обвязки
 
 **После создания:**
 ```bash
@@ -152,7 +164,7 @@ Adminer (управление БД): `http://localhost:8081`
 - Docker Compose
 - openssl (для генерации паролей)
 
-## Структура проекта
+## Директория установки
 
 По умолчанию скрипт создаёт приложения в родительской директории (т.е. если скрипт находится в `/home/username/projects/rails_app_maker/`, приложения будут создаваться в `/home/username/projects/`).
 

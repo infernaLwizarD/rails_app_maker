@@ -84,6 +84,8 @@ process_template "$TEMPLATES_DIR/docker/docker-compose.redis.yml" "docker-compos
 
 - `setup.sh` — интерактивный мастер, собирает параметры и вызывает `create-rails-app.sh`
 - `create-rails-app.sh` — основной скрипт, который непосредственно создаёт приложение (можно вызывать напрямую)
+- `cleanup.sh` — очистка Docker-ресурсов (контейнеры, сети, образы, volumes) созданного приложения
 - `lib/` — модули мастера установки (общие функции, режимы, опции rails new)
 - `config.sh` — настройки по умолчанию и плейсхолдеры для шаблонов
+- `config.example.sh` — пример конфигурации
 - `templates/` — файлы-шаблоны с плейсхолдерами
