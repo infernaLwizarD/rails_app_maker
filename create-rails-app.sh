@@ -165,6 +165,11 @@ docker run --rm -v "${PWD}:/app" -w /app ruby:$RUBY_VERSION bash -c "gem install
 # ============================================================
 
 if [ "$VANILLA_MODE" = true ]; then
+    log_info "Инициализация git репозитория..."
+    git init
+    git add -A
+    git commit -m "init: rails new ${APP_NAME}" --quiet
+
     echo ""
     log_info "✨ Rails приложение '$APP_NAME' успешно создано!"
     echo ""
@@ -250,13 +255,14 @@ if [ "$USE_BOILERPLATE" = true ]; then
     log_info "Docker конфиги созданы и будут перезаписаны при установке boilerplate..."
 fi
 
+# Инициализация git репозитория
+log_info "Инициализация git репозитория..."
+git init
+git add -A
+git commit -m "init: rails new ${APP_NAME}" --quiet
+
 # Добавление rails8_boilerplate как git submodule если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
-    log_info "Инициализация git репозитория..."
-    git init
-    git add -A
-    git commit -m "init: rails new ${APP_NAME}" --quiet
-
     log_info "Добавление rails8_boilerplate как git submodule..."
     git submodule add "$BOILERPLATE_GIT_URL" "$BOILERPLATE_SUBMODULE_PATH"
 
@@ -289,6 +295,10 @@ docker compose run --rm web bundle install
 log_info "Инициализация importmap, turbo, stimulus..."
 docker compose run --rm web rails importmap:install turbo:install stimulus:install
 
+log_info "Коммит базовой настройки..."
+git add -A
+git commit -m "chore: bundle install and init importmap, turbo, stimulus" --quiet
+
 # Установка и настройка boilerplate если выбрана опция
 if [ "$USE_BOILERPLATE" = true ]; then
     # Сохраняем .env — генератор boilerplate перезаписывает его с новым DB_PASSWORD,
@@ -309,6 +319,10 @@ if [ "$USE_BOILERPLATE" = true ]; then
     
     log_info "Заполнение базы данных..."
     docker compose run --rm web rails db:seed
+
+    log_info "Коммит установки boilerplate..."
+    git add -A
+    git commit -m "feat: install rails8_boilerplate" --quiet
 else
     # Создание БД
     log_info "Создание баз данных..."
