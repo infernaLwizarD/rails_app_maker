@@ -276,6 +276,30 @@ if [ "$USE_BOILERPLATE" = true ]; then
     echo "else" >> Gemfile
     echo "  gem 'rails8_boilerplate', path: '${BOILERPLATE_SUBMODULE_PATH}'" >> Gemfile
     echo "end" >> Gemfile
+
+    log_info "Добавление тестовых и dev-гемов для boilerplate..."
+    # dev_dependency из gemspec не работают для path-гемов,
+    # поэтому добавляем напрямую в Gemfile хост-приложения
+    cat >> Gemfile << 'GEMS'
+
+# Testing & development gems (required by rails8_boilerplate)
+group :development, :test do
+  gem "rspec-rails", "~> 8.0"
+  gem "factory_bot_rails", "~> 6.4"
+  gem "faker", "~> 3.5"
+  gem "email_spec", "~> 2.2"
+  gem "test-prof", "~> 1.4"
+end
+
+# Code quality
+group :development do
+  gem "rubocop", "~> 1.69", require: false
+  gem "rubocop-rails", "~> 2.27", require: false
+  gem "rubocop-rspec", "~> 3.2", require: false
+  gem "rubocop-performance", "~> 1.23", require: false
+  gem "rubocop-factory_bot", "~> 2.26", require: false
+end
+GEMS
 fi
 
 # Создание пустого Gemfile.lock для Docker build
@@ -311,6 +335,9 @@ if [ "$USE_BOILERPLATE" = true ]; then
     # Восстанавливаем .env с оригинальным DB_PASSWORD
     mv .env.backup .env
 
+    log_info "Установка новых гемов..."
+    docker compose run --rm web bundle install
+
     log_info "Создание баз данных..."
     docker compose run --rm web rails db:create
 
@@ -319,6 +346,12 @@ if [ "$USE_BOILERPLATE" = true ]; then
     
     log_info "Заполнение базы данных..."
     docker compose run --rm web rails db:seed
+
+    log_info "Удаление transaction_timeout из structure.sql (несовместимо с Postgres 13)..."
+    sed -i '/SET transaction_timeout/d' db/structure.sql db/cache_structure.sql db/queue_structure.sql db/cable_structure.sql 2>/dev/null || true
+
+    log_info "Подготовка тестовой БД..."
+    docker compose run --rm web bash -c "RAILS_ENV=test rails db:create db:migrate"
 
     log_info "Коммит установки boilerplate..."
     git add -A
@@ -350,6 +383,9 @@ if [ "$USE_BOILERPLATE" = true ]; then
     echo ""
     echo "✨ Rails 8 Boilerplate установлен и настроен!"
     echo "Примечание: Конфигурационные файлы могли быть изменены генератором boilerplate."
+    echo ""
+    echo "Запуск тестов:"
+    echo "  docker compose exec web bash -c 'RAILS_ENV=test bundle exec rspec spec/features'"
 fi
 
 echo ""
