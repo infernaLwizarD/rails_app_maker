@@ -167,6 +167,7 @@ docker run --rm -v "${PWD}:/app" -w /app ruby:$RUBY_VERSION bash -c "gem install
 if [ "$VANILLA_MODE" = true ]; then
     log_info "Инициализация git репозитория..."
     git init
+    printf '\n# Ignore Jetbrains IDE config\n/.idea/*\n' >> .gitignore
     git add -A
     git commit -m "init: rails new ${APP_NAME}" --quiet
 
@@ -258,6 +259,7 @@ fi
 # Инициализация git репозитория
 log_info "Инициализация git репозитория..."
 git init
+printf '\n# Ignore Jetbrains IDE config\n/.idea/*\n' >> .gitignore
 git add -A
 git commit -m "init: rails new ${APP_NAME}" --quiet
 
