@@ -22,6 +22,6 @@ DEFAULT_POSTGRES_PORT=5432
 DEFAULT_ADMINER_PORT=8081
 
 # Образы Docker
-POSTGRES_IMAGE="postgres:13.9-alpine"
+POSTGRES_IMAGE="postgres:17-alpine"
 SELENIUM_IMAGE="selenium/standalone-chrome:112.0-20230421"
 ADMINER_IMAGE="adminer:4.8.1"

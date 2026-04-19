@@ -21,6 +21,6 @@ BOILERPLATE_GIT_URL="https://github.com/infernaLwizarD/rails8_boilerplate.git"
 BOILERPLATE_SUBMODULE_PATH="lib/rails8_boilerplate"
 
 # Образы Docker
-POSTGRES_IMAGE="postgres:13.9-alpine"
+POSTGRES_IMAGE="postgres:17-alpine"
 SELENIUM_IMAGE="selenium/standalone-chrome:112.0-20230421"
 ADMINER_IMAGE="adminer:4.8.1"

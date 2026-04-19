@@ -16,7 +16,7 @@ else
     DEFAULT_WEB_PORT=3001
     DEFAULT_POSTGRES_PORT=5432
     DEFAULT_ADMINER_PORT=8081
-    POSTGRES_IMAGE="postgres:13.9-alpine"
+    POSTGRES_IMAGE="postgres:17-alpine"
     SELENIUM_IMAGE="selenium/standalone-chrome:112.0-20230421"
     ADMINER_IMAGE="adminer:4.8.1"
 fi
@@ -348,9 +348,6 @@ if [ "$USE_BOILERPLATE" = true ]; then
     
     log_info "Заполнение базы данных..."
     docker compose run --rm web rails db:seed
-
-    log_info "Удаление transaction_timeout из structure.sql (несовместимо с Postgres 13)..."
-    sed -i '/SET transaction_timeout/d' db/structure.sql db/cache_structure.sql db/queue_structure.sql db/cable_structure.sql 2>/dev/null || true
 
     log_info "Подготовка тестовой БД..."
     docker compose run --rm web bash -c "RAILS_ENV=test rails db:create db:migrate"
